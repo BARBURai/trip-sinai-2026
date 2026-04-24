@@ -182,14 +182,14 @@ details .details-body { padding:0 14px 14px; color:var(--text-dim); font-size:13
 .notif-permission-prompt .sub { font-size:12px; color:var(--text-dim); line-height:1.5; }
 .notif-permission-prompt .actions { margin-top:10px; display:flex; gap:8px; }
 
-/* ============ SINAI SPLASH - CINEMATIC ============ */
+/* ============ SINAI SPLASH - CINEMATIC v2 ============ */
 #splash {
   position: fixed;
   inset: 0;
   background: #000;
   z-index: 9999;
   overflow: hidden;
-  animation: splashShow 3.2s ease-in-out forwards;
+  animation: splashShow 6.5s ease-in-out forwards;
   pointer-events: none;
 }
 #splash.instant-hide { display: none; }
@@ -200,20 +200,23 @@ details .details-body { padding:0 14px 14px; color:var(--text-dim); font-size:13
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transform: scale(1.15);
-  animation: splashKenBurns 3.2s ease-out forwards;
+  transform: scale(1.2);
+  animation: splashKenBurns 6.5s ease-out forwards;
 }
-.splash-bg::after {
-  content: '';
+
+.splash-gradient {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(0,0,0,0.3) 0%,
-    rgba(0,0,0,0.1) 40%,
-    rgba(0,0,0,0.55) 80%,
-    rgba(0,0,0,0.9) 100%
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.1) 28%,
+    rgba(0,0,0,0.1) 55%,
+    rgba(0,0,0,0.7) 82%,
+    rgba(0,0,0,0.95) 100%
   );
+  opacity: 0;
+  animation: splashFadeIn 1s ease-out 0.3s forwards;
 }
 
 .splash-inner {
@@ -223,71 +226,175 @@ details .details-body { padding:0 14px 14px; color:var(--text-dim); font-size:13
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding: 0 24px 15vh;
+  justify-content: space-between;
+  padding: 7vh 24px 6vh;
   color: white;
   text-align: center;
 }
 
-.splash-tagline {
-  font-size: 13px;
+/* Logo at top */
+.splash-logo-top-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: splashFadeDown 1s ease-out 0.5s forwards;
+}
+.splash-logo-top {
+  width: 76px;
+  height: 76px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.95);
+  padding: 7px;
+  object-fit: contain;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.5);
+}
+.splash-logo-top-caption {
+  font-size: 15px;
+  color: rgba(255,255,255,0.9);
+  margin-top: 14px;
+  letter-spacing: 0.18em;
   font-weight: 500;
-  letter-spacing: 0.4em;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+}
+
+/* Main content block */
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.splash-tagline {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.35em;
   text-transform: uppercase;
   opacity: 0;
   transform: translateY(16px);
-  animation: splashFadeUp 1.2s ease-out 0.5s forwards;
-  color: #E8A85C;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  animation: splashFadeUp 1.2s ease-out 1.4s forwards;
+  color: #FFD89A;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.7);
 }
 
 .splash-main {
-  font-size: 72px;
+  font-size: 96px;
   font-weight: 900;
   letter-spacing: -0.02em;
   line-height: 1;
-  margin-top: 12px;
+  margin-top: 16px;
   opacity: 0;
-  transform: translateY(20px);
-  animation: splashFadeUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;
-  text-shadow: 0 4px 24px rgba(0,0,0,0.5);
-}
-
-.splash-sub-main {
-  font-size: 15px;
-  font-weight: 400;
-  margin-top: 10px;
-  opacity: 0;
-  transform: translateY(12px);
-  animation: splashFadeUp 1.2s ease-out 1.1s forwards;
-  letter-spacing: 0.05em;
-  color: rgba(255,255,255,0.9);
-  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  transform: translateY(30px) scale(0.95);
+  animation: splashHeroIn 1.6s cubic-bezier(0.22, 1, 0.36, 1) 1.8s forwards;
+  text-shadow: 0 6px 32px rgba(0,0,0,0.6);
 }
 
 .splash-swan {
-  font-size: 38px;
-  margin-top: 24px;
+  font-size: 54px;
+  margin-top: 20px;
   opacity: 0;
-  animation: splashSwanFloat 2s ease-out 1.3s forwards;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  animation: splashSwanFloat 2s ease-out 2.3s forwards;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
+}
+
+.splash-sub-main {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 20px;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: splashFadeUp 1.2s ease-out 2.8s forwards;
+  letter-spacing: 0.03em;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+}
+
+.splash-dates {
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 10px;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: splashFadeUp 1.1s ease-out 3.2s forwards;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
+.splash-quote {
+  font-size: 17px;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 28px;
+  opacity: 0;
+  animation: splashFadeIn 1.4s ease-out 3.8s forwards;
+  color: rgba(255,220,180,0.95);
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  padding: 0 20px;
+  max-width: 90%;
+}
+
+/* Crew names at bottom */
+.splash-crew-names {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: splashFadeUp 1.3s ease-out 4.5s forwards;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  letter-spacing: 0.04em;
+}
+.splash-dot {
+  color: #FFD89A;
+  opacity: 0.7;
+}
+.splash-dot-and {
+  color: #FFD89A;
+  margin-left: 4px;
+}
+.splash-and-you {
+  color: #FFD89A;
+  font-style: italic;
+  font-weight: 700;
+  animation: splashPulse 2s ease-in-out 5.2s infinite;
+  display: inline-block;
 }
 
 @keyframes splashKenBurns {
-  0%   { opacity: 0; transform: scale(1.15); }
-  15%  { opacity: 1; }
+  0%   { opacity: 0; transform: scale(1.2); }
+  10%  { opacity: 1; }
   100% { opacity: 1; transform: scale(1.0); }
+}
+@keyframes splashFadeIn {
+  to { opacity: 1; }
 }
 @keyframes splashFadeUp {
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes splashFadeDown {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes splashHeroIn {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 @keyframes splashSwanFloat {
-  0%   { opacity: 0; transform: translateY(10px) scale(0.8); }
-  50%  { opacity: 1; transform: translateY(-4px) scale(1.05); }
+  0%   { opacity: 0; transform: translateY(15px) scale(0.7); }
+  50%  { opacity: 1; transform: translateY(-6px) scale(1.1); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+@keyframes splashPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.05); }
+}
 @keyframes splashShow {
-  0%, 85%  { opacity: 1; visibility: visible; }
+  0%, 92%  { opacity: 1; visibility: visible; }
   100%     { opacity: 0; visibility: hidden; }
 }
 
@@ -1183,14 +1290,32 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
 <body>
 <div id="splash">
   <div class="splash-bg" id="splashBg"></div>
+  <div class="splash-gradient"></div>
   <div class="splash-inner">
-    <div class="splash-tagline">כבר בדרך</div>
-    <div class="splash-main">סיני</div>
-    <div class="splash-sub-main">סופ"ש במאי 2026</div>
-    <div class="splash-swan">🦢</div>
-    <div class="splash-logo-wrap">
-      <img class="splash-logo" id="splashLogo" alt="Barbur Tours">
-      <div class="splash-logo-caption">מבית ברבור טורס</div>
+    <div class="splash-logo-top-wrap">
+      <img class="splash-logo-top" id="splashLogo" alt="Barbur Tours">
+      <div class="splash-logo-top-caption">ברבור טורס מציגים</div>
+    </div>
+
+    <div class="splash-content">
+      <div class="splash-tagline">כבר בדרך</div>
+      <div class="splash-main">סיני</div>
+      <div class="splash-swan">🦢</div>
+      <div class="splash-sub-main">Castle Beach · ראס שיטאן</div>
+      <div class="splash-dates">14 – 17 במאי 2026</div>
+      <div class="splash-quote">"לרבוץ מול הים. לא יותר מזה."</div>
+    </div>
+
+    <div class="splash-crew-names">
+      <span>רון</span>
+      <span class="splash-dot">·</span>
+      <span>שרול</span>
+      <span class="splash-dot">·</span>
+      <span>נירו</span>
+      <span class="splash-dot">·</span>
+      <span>רם</span>
+      <span class="splash-dot-and">...</span>
+      <span class="splash-and-you">ומי עוד?</span>
     </div>
   </div>
 </div>
@@ -1325,19 +1450,6 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
     <button class="btn-primary-big" onclick="showSignupForm()">+ הוסף אותי לרשימה</button>
   </div>
 
-  <div id="signupModal" class="modal-backdrop" style="display:none;" onclick="hideSignupFormIfBackdrop(event)">
-    <div class="modal-content">
-      <div class="modal-title">הצטרפות לרשימת הברבורים</div>
-      <input type="text" id="signupName" class="signup-input" placeholder="השם שלך" maxlength="30">
-      <div id="signupError" class="signup-error"></div>
-      <div class="modal-actions">
-        <button class="btn-ghost" onclick="hideSignupForm()">ביטול</button>
-        <button class="btn-primary-big" onclick="submitSignup()">✓ הוסף אותי</button>
-      </div>
-      <div class="signup-note">מי שנרשם מתחייב - אנא תתאם עם רון לפני הוספה</div>
-    </div>
-  </div>
-
   <div class="section-title">🏞️ סיני בתמונות</div>
   <div id="galleryContent"></div>
 </section>
@@ -1376,6 +1488,20 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
     <span>חירום</span>
   </button>
 </nav>
+
+<!-- Global signup modal - works from any view -->
+<div id="signupModal" class="modal-backdrop" style="display:none;" onclick="hideSignupFormIfBackdrop(event)">
+  <div class="modal-content">
+    <div class="modal-title">הצטרפות לרשימת הברבורים</div>
+    <input type="text" id="signupName" class="signup-input" placeholder="השם שלך" maxlength="30">
+    <div id="signupError" class="signup-error"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="hideSignupForm()">ביטול</button>
+      <button class="btn-primary-big" onclick="submitSignup()">✓ הוסף אותי</button>
+    </div>
+    <div class="signup-note">מי שנרשם מתחייב - אנא תתאם עם רון לפני הוספה</div>
+  </div>
+</div>
 
 <script>
 const TRIP = {
@@ -2119,7 +2245,7 @@ document.addEventListener('DOMContentLoaded', function() {
       sessionStorage.setItem('sinai_splashShown', '1');
       setTimeout(function() {
         if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
-      }, 3400);
+      }, 6700);
     }
   }
 });
