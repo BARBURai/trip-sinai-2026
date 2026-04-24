@@ -57,9 +57,10 @@ body { padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe
 .note-box.warning { background:#3B2E14; border-right:3px solid var(--amber); color:#FCD34D; }
 .note-box.success { background:#0F2E1E; border-right:3px solid var(--green); color:#86EFAC; }
 .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); display:flex; justify-content:space-around; padding:8px 4px calc(8px + env(safe-area-inset-bottom)); max-width:680px; margin:0 auto; z-index:100; }
-.nav-btn { background:transparent; border:none; color:var(--text-faint); padding:8px 6px; font-size:10px; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; border-radius:10px; transition:color var(--transition); flex:1; }
-.nav-btn svg { width:22px; height:22px; stroke-width:1.8; }
-.nav-btn.active { color:var(--accent); }
+.nav-btn { background:transparent; border:none; color:white; opacity:0.75; padding:8px 6px; font-size:10px; font-family:inherit; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; border-radius:10px; transition:all var(--transition); flex:1; }
+.nav-btn svg { width:22px; height:22px; stroke-width:1.8; stroke:white; }
+.nav-btn.active { color:white; opacity:1; background:var(--accent); }
+.nav-btn.active svg { stroke:white; stroke-width:2.5; }
 .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 14px; border-radius:var(--radius-sm); background:var(--surface-2); color:var(--text); border:1px solid var(--border); font-family:inherit; font-size:13px; font-weight:500; text-decoration:none; cursor:pointer; transition:all var(--transition); min-height:40px; }
 .btn:active { transform:scale(0.97); }
 .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
@@ -660,7 +661,7 @@ details .details-body { padding:0 14px 14px; color:var(--text-dim); font-size:13
   aspect-ratio: 16 / 9;
   max-height: 30vh;
   background-size: cover;
-  background-position: center;
+  background-position: center bottom;
   overflow: hidden;
   display: flex;
   align-items: flex-end;
@@ -669,7 +670,7 @@ details .details-body { padding:0 14px 14px; color:var(--text-dim); font-size:13
   position: relative;
   width: 100%;
   padding: 50px 20px 20px;
-  background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+  background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.15) 100%);
   color: white;
 }
 .hero-eyebrow {
@@ -1261,12 +1262,12 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
   flex: 0 0 auto;
   background: transparent;
   border: none;
-  color: var(--text-dim);
+  color: white;
   padding: 8px 10px;
   border-radius: 14px;
   font-family: inherit;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -1275,26 +1276,31 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
   transition: all 0.15s;
   white-space: nowrap;
   min-width: 58px;
+  opacity: 0.75;
 }
 .top-nav-btn svg {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
+  stroke: white;
 }
 .top-nav-btn span {
   font-size: 11px;
   line-height: 1;
+  color: white;
 }
 .top-nav-btn:active {
-  background: rgba(46,139,139,0.2);
+  background: rgba(255,255,255,0.1);
 }
 .top-nav-btn.active {
   background: var(--accent);
   color: white;
   font-weight: 700;
+  opacity: 1;
 }
 .top-nav-btn.active svg {
   stroke-width: 2.5;
+  stroke: white;
 }
 
 </style>
@@ -1398,12 +1404,12 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
   <div id="homeCrewStrip"></div>
 
   <!-- Signup CTA (prominent on home) -->
-  <div class="signup-cta-home" onclick="navigate('crew'); setTimeout(showSignupForm, 250)">
+  <div class="signup-cta-home" onclick="navigate('crew')">
     <div class="signup-cta-home-content">
       <div class="signup-cta-icon">🦢</div>
       <div>
         <div class="signup-cta-title">הצטרפו אלינו</div>
-        <div class="signup-cta-sub">לחצו כאן כדי להוסיף את עצמכם לרשימה</div>
+        <div class="signup-cta-sub">לחצו לראות את החבורה ולהוסיף את עצמכם</div>
       </div>
       <div class="signup-cta-arrow">←</div>
     </div>
@@ -1662,7 +1668,7 @@ function renderHomeCrewStrip() {
       '</div>';
   });
   // "+" button to add
-  html += '<div class="home-crew-card" onclick="navigate(\'crew\'); setTimeout(showSignupForm, 250)" style="cursor:pointer;">' +
+  html += '<div class="home-crew-card" onclick="navigate(\'crew\')" style="cursor:pointer;">' +
     '<div class="home-crew-avatar home-crew-add">+</div>' +
     '<div class="home-crew-name" style="color:var(--text-dim);">הצטרפו</div>' +
     '</div>';
