@@ -1461,15 +1461,7 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
   <div id="weatherContent">
     <div style="text-align:center;padding:20px;color:var(--text-dim);">טוען מזג אוויר...</div>
   </div>
-  <!-- פריים של Open-Meteo / wttr.in -->
-  <div style="margin-top:12px;">
-    <iframe 
-      src="https://wttr.in/Nuweiba?lang=he&format=3&m" 
-      style="display:none;" 
-      id="wttrFrame"
-      onload="parseWttr(this)">
-    </iframe>
-  </div>
+
 </section>
 <section class="view" id="view-tips">
   <div class="section-title">💡 מידע חשוב</div>
@@ -2419,10 +2411,15 @@ function addPokerPlayer() {
 }
 
 function removePokerPlayer(name) {
-  if (!confirm('להסיר את ' + name + ' מהטורניר?')) return;
   pokerState.players = pokerState.players.filter(p => p !== name);
   savePokerState();
   renderPokerAll();
+}
+function removePokerPlayerIdx(idx) {
+  const name = pokerState.players[parseInt(idx)];
+  if (!name) return;
+  if (!confirm('להסיר את ' + name + ' מהטורניר?')) return;
+  removePokerPlayer(name);
 }
 
 function renderPokerPlayers() {
@@ -2431,9 +2428,9 @@ function renderPokerPlayers() {
   if (pokerState.players.length === 0) {
     el.innerHTML = '<span style="color:#888;font-size:13px;">אין שחקנים עדיין</span>';
   } else {
-    el.innerHTML = pokerState.players.map(p =>
+    el.innerHTML = pokerState.players.map((p, i) =>
       '<span style="background:#1a1f2e;border:1px solid #D97644;border-radius:20px;padding:5px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;color:white;">' +
-        p + '<span onclick="removePokerPlayer('' + p.replace(/'/g,"\'") + '')" style="cursor:pointer;color:#c0392b;font-weight:700;font-size:15px;">×</span>' +
+        p + '<span data-pidx="' + i + '" onclick="removePokerPlayerIdx(this.dataset.pidx)" style="cursor:pointer;color:#c0392b;font-weight:700;font-size:15px;">×</span>' +
       '</span>'
     ).join('');
   }
@@ -2448,13 +2445,13 @@ function renderPokerEvening() {
   if (!el) return;
   if (numEl) numEl.textContent = (pokerState.evenings.length + 1);
 
-  el.innerHTML = pokerState.players.map(p => {
-    const pid = 'poker_p_' + p.replace(/[^א-תa-zA-Z0-9]/g, '_');
+  el.innerHTML = pokerState.players.map((p, i) => {
+    const pid = 'poker_p_' + i;
     return '<div style="display:flex;align-items:center;gap:10px;background:#1a1f2e;border-radius:10px;padding:10px 12px;">' +
       '<div style="min-width:70px;font-weight:600;color:white;text-align:right;">' + p + '</div>' +
-      '<button onclick="pokerBuy('' + p.replace(/'/g,"\'") + '',-10)" style="background:#c0392b;color:white;border:none;border-radius:6px;width:34px;height:34px;font-size:18px;cursor:pointer;font-weight:700;">−</button>' +
+      '<button data-pidx="' + i + '" data-delta="-10" onclick="pokerBuyIdx(this)" style="background:#c0392b;color:white;border:none;border-radius:6px;width:34px;height:34px;font-size:18px;cursor:pointer;font-weight:700;">−</button>' +
       '<div id="' + pid + '" style="min-width:50px;text-align:center;font-size:18px;font-weight:700;color:white;">0</div>' +
-      '<button onclick="pokerBuy('' + p.replace(/'/g,"\'") + '',10)" style="background:#2d6a4f;color:white;border:none;border-radius:6px;width:34px;height:34px;font-size:18px;cursor:pointer;font-weight:700;">+</button>' +
+      '<button data-pidx="' + i + '" data-delta="10" onclick="pokerBuyIdx(this)" style="background:#2d6a4f;color:white;border:none;border-radius:6px;width:34px;height:34px;font-size:18px;cursor:pointer;font-weight:700;">+</button>' +
       '<div style="color:#888;font-size:12px;margin-right:4px;">₪10/קנייה</div>' +
       '</div>';
   }).join('');
@@ -2468,6 +2465,12 @@ function renderPokerEvening() {
   updatePokerSumMsg();
 }
 
+function pokerBuyIdx(btn) {
+  const idx = parseInt(btn.dataset.pidx);
+  const delta = parseInt(btn.dataset.delta);
+  const player = pokerState.players[idx];
+  if (player) pokerBuy(player, delta);
+}
 function pokerBuy(player, delta) {
   if (!window.pokerCurrentBuys) window.pokerCurrentBuys = {};
   const current = window.pokerCurrentBuys[player] || 0;
@@ -2479,7 +2482,8 @@ function pokerBuy(player, delta) {
 }
 
 function updatePokerDisplay(player) {
-  const pid = 'poker_p_' + player.replace(/[^א-תa-zA-Z0-9]/g, '_');
+  const idx = pokerState.players.indexOf(player);
+  const pid = 'poker_p_' + idx;
   const el = document.getElementById(pid);
   if (!el) return;
   const val = (window.pokerCurrentBuys || {})[player] || 0;
