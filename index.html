@@ -1390,14 +1390,6 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z"/></svg>
     <span>חירום</span>
   </button>
-  <button class="top-nav-btn" data-view="weather" onclick="navigate('weather')">
-    <span>🌤️</span>
-    <span>מזג אוויר</span>
-  </button>
-  <button class="top-nav-btn" data-view="poker" onclick="navigate('poker')">
-    <span>🃏</span>
-    <span>פוקר</span>
-  </button>
 </nav>
 
 <section class="view active" id="view-home">
@@ -1456,13 +1448,6 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
   <div id="prepList"></div>
 </section>
 
-<section class="view" id="view-weather">
-  <div class="section-title">🌤️ מזג אוויר נוויבע</div>
-  <div id="weatherContent">
-    <div style="text-align:center;padding:20px;color:var(--text-dim);">טוען מזג אוויר...</div>
-  </div>
-
-</section>
 <section class="view" id="view-tips">
   <div class="section-title">💡 מידע חשוב</div>
   <div id="tipsList"></div>
@@ -1530,10 +1515,6 @@ details .details-body { font-size: 15px !important; line-height: 1.75 !important
   <button class="nav-btn" data-view="contacts" onclick="navigate('contacts')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z"/></svg>
     <span>חירום</span>
-  </button>
-  <button class="top-nav-btn" data-view="poker" onclick="navigate('poker')">
-    <span>🃏</span>
-    <span>פוקר</span>
   </button>
 </nav>
 
@@ -2033,17 +2014,9 @@ function renderParticipants() {
   participants.forEach(function(p, i) {
     const date = p.joined_at ? new Date(p.joined_at) : null;
     const dateStr = date ? (date.getDate() + '.' + (date.getMonth() + 1)) : '';
-    const photo = p.photo || '';
-    const initial = (p.name || '?').charAt(0);
-    const avatarHtml = photo
-      ? '<img src="' + photo + '" alt="' + (p.name||'') + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">'
-      : '<div style="width:44px;height:44px;border-radius:50%;background:#64748B;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:white;flex-shrink:0;">' + initial + '</div>';
-    html += '<div class="participant-row" style="display:flex;align-items:center;gap:12px;">' +
-      avatarHtml +
-      '<div>' +
+    html += '<div class="participant-row">' +
       '<div class="participant-name">🦢 ' + (p.name || '(ללא שם)') + '</div>' +
       (dateStr ? '<div class="participant-meta">נרשם ' + dateStr + '</div>' : '') +
-      '</div>' +
       '</div>';
   });
   listEl.innerHTML = html;
@@ -2314,233 +2287,6 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(swUrl).catch(() => {});
 }
 
-
-;
-
-
-/* ============ WEATHER ============ */
-function loadWeather() {
-  const el = document.getElementById('weatherContent');
-  if (!el) return;
-  
-  // Open-Meteo API - נוויבע (lat 29.03, lon 34.66)
-  const url = 'https://api.open-meteo.com/v1/forecast?latitude=29.03&longitude=34.66&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode&timezone=Asia%2FJerusalem&forecast_days=7';
-  
-  fetch(url).then(r => r.json()).then(data => {
-    const days = data.daily;
-    const codes = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',53:'🌦️',61:'🌧️',80:'🌦️',95:'⛈️'};
-    const dayNames = ['א','ב','ג','ד','ה','ו','ש'];
-    let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">';
-    for (let i = 0; i < Math.min(7, days.time.length); i++) {
-      const d = new Date(days.time[i]);
-      const dow = dayNames[d.getDay()];
-      const icon = codes[days.weathercode[i]] || '🌡️';
-      const max = Math.round(days.temperature_2m_max[i]);
-      const min = Math.round(days.temperature_2m_min[i]);
-      html += '<div style="background:var(--surface);border-radius:12px;padding:10px;text-align:center;">' +
-        '<div style="font-size:11px;color:var(--text-dim);">יום ' + dow + '</div>' +
-        '<div style="font-size:22px;">' + icon + '</div>' +
-        '<div style="font-size:15px;font-weight:700;color:var(--accent);">' + max + '°</div>' +
-        '<div style="font-size:12px;color:var(--text-dim);">' + min + '°</div>' +
-        '</div>';
-    }
-    html += '</div>';
-    html += '<div style="margin-top:12px;padding:10px;background:var(--surface);border-radius:10px;font-size:12px;color:var(--text-dim);text-align:center;">נוויבע · סיני · 7 ימים קדימה</div>';
-    el.innerHTML = html;
-  }).catch(() => {
-    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);">לא ניתן לטעון מזג אוויר כרגע</div>';
-  });
-}
-
-// טעינה עצלה כשנכנסים לטאב
-const _weatherOrigNav = window.navigate;
-if (typeof window._weatherNavWrapped === 'undefined') {
-  window._weatherNavWrapped = true;
-  const __origNav = window.navigate;
-  window.navigate = function(view) {
-    __origNav(view);
-    if (view === 'weather') loadWeather();
-  };
-}
-
-
-/* ============ POKER TOURNAMENT ============ */
-const POKER_KEY = 'sinai_poker_v1';
-
-let pokerState = { players: [], evenings: [] };
-
-async function loadPokerState() {
-  try {
-    const db = await ensureFirebase();
-    const doc = await db.collection('sinai_app').doc(POKER_KEY).get();
-    if (doc.exists) pokerState = doc.data();
-  } catch(e) {
-    try {
-      const ls = localStorage.getItem(POKER_KEY);
-      if (ls) pokerState = JSON.parse(ls);
-    } catch {}
-  }
-  renderPokerAll();
-}
-
-async function savePokerState() {
-  try {
-    const db = await ensureFirebase();
-    await db.collection('sinai_app').doc(POKER_KEY).set(JSON.parse(JSON.stringify(pokerState)));
-  } catch(e) {}
-  try { localStorage.setItem(POKER_KEY, JSON.stringify(pokerState)); } catch {}
-}
-
-function renderPokerAll() {
-  renderPokerPlayers();
-  renderPokerEvening();
-  renderPokerTable();
-  renderPokerTransfers();
-  renderPokerHistory();
-}
-
-/* --- שחקנים --- */
-function addPokerPlayer() {
-  const input = document.getElementById('pokerPlayerInput');
-  const name = (input.value || '').trim();
-  if (!name || pokerState.players.includes(name)) { input.value = ''; return; }
-  pokerState.players.push(name);
-  input.value = '';
-  savePokerState();
-  renderPokerAll();
-}
-
-function removePokerPlayer(name) {
-  pokerState.players = pokerState.players.filter(p => p !== name);
-  savePokerState();
-  renderPokerAll();
-}
-function removePokerPlayerIdx(idx) {
-  const name = pokerState.players[parseInt(idx)];
-  if (!name) return;
-  if (!confirm('להסיר את ' + name + ' מהטורניר?')) return;
-  removePokerPlayer(name);
-}
-
-function renderPokerPlayers() {
-  const el = document.getElementById('pokerPlayersList');
-  if (!el) return;
-  if (pokerState.players.length === 0) {
-    el.innerHTML = '<span style="color:#888;font-size:13px;">אין שחקנים עדיין</span>';
-  } else {
-    el.innerHTML = pokerState.players.map((p, i) =>
-      '<span style="background:#1a1f2e;border:1px solid #D97644;border-radius:20px;padding:5px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;color:white;">' +
-        p + '<span data-pidx="' + i + '" onclick="removePokerPlayerIdx(this.dataset.pidx)" style="cursor:pointer;color:#c0392b;font-weight:700;font-size:15px;">×</span>' +
-      '</span>'
-    ).join('');
-  }
-  const card = document.getElementById('pokerEveningCard');
-  if (card) card.style.display = pokerState.players.length >= 2 ? '' : 'none';
-}
-
-/* --- ערב חי --- */
-function renderPokerEvening() {
-  const numEl = document.getElementById('pokerEveningNum');
-  const el = document.getElementById('pokerInputs');
-  if (!el) return;
-  if (numEl) numEl.textContent = (pokerState.evenings.length + 1);
-
-  el.innerHTML = pokerState.players.map((p, i) => {
-    const pid = 'poker_p_' + i;
-    return '<div style="display:flex;align-items:center;gap:10px;background:#1a1f2e;border-radius:10px;padding:10px 12px;">' +
-      '<div style="min-width:70px;font-weight:600;color:white;text-align:right;">' + p + '</div>' +
-      '<button data-pidx="' + i + '" data-delta="-10" onclick="pokerBuyIdx(this)" style="background:#c0392b;color:white;border:none;border-radius:6px;width:34px;height:34px;font-size:18px;cursor:pointer;font-weight:700;">−</button>' +
-      '<div id="' + pid + '" style="min-width:50px;text-align:center;font-size:18px;font-weight:700;color:white;">0</div>' +
-      '<button data-pidx="' + i + '" data-delta="10" onclick="pokerBuyIdx(this)" style="background:#2d6a4f;color:white;border:none;border-radius:6px;width:34px;height:34px;font-size:18px;cursor:pointer;font-weight:700;">+</button>' +
-      '<div style="color:#888;font-size:12px;margin-right:4px;">₪10/קנייה</div>' +
-      '</div>';
-  }).join('');
-
-  // אתחל ערכים
-  if (!window.pokerCurrentBuys) window.pokerCurrentBuys = {};
-  pokerState.players.forEach(p => {
-    if (!window.pokerCurrentBuys[p]) window.pokerCurrentBuys[p] = 0;
-    updatePokerDisplay(p);
-  });
-  updatePokerSumMsg();
-}
-
-function pokerBuyIdx(btn) {
-  const idx = parseInt(btn.dataset.pidx);
-  const delta = parseInt(btn.dataset.delta);
-  const player = pokerState.players[idx];
-  if (player) pokerBuy(player, delta);
-}
-function pokerBuy(player, delta) {
-  if (!window.pokerCurrentBuys) window.pokerCurrentBuys = {};
-  const current = window.pokerCurrentBuys[player] || 0;
-  const newVal = current + delta;
-  if (newVal < 0) return; // לא מתחת לאפס
-  window.pokerCurrentBuys[player] = newVal;
-  updatePokerDisplay(player);
-  updatePokerSumMsg();
-}
-
-function updatePokerDisplay(player) {
-  const idx = pokerState.players.indexOf(player);
-  const pid = 'poker_p_' + idx;
-  const el = document.getElementById(pid);
-  if (!el) return;
-  const val = (window.pokerCurrentBuys || {})[player] || 0;
-  el.textContent = val;
-  el.style.color = val > 0 ? '#e74c3c' : '#888';
-}
-
-function updatePokerSumMsg() {
-  const msg = document.getElementById('pokerEveningSumMsg');
-  if (!msg) return;
-  const buys = window.pokerCurrentBuys || {};
-  const pot = pokerState.players.reduce((s, p) => s + (buys[p] || 0), 0);
-  msg.textContent = 'סה"כ קופה: ₪' + pot;
-  msg.style.color = '#D97644';
-}
-
-function cancelPokerEvening() {
-  if (!confirm('לבטל את הערב הנוכחי? כל הקניות יימחקו.')) return;
-  window.pokerCurrentBuys = {};
-  pokerState.players.forEach(p => { if (window.pokerCurrentBuys) window.pokerCurrentBuys[p] = 0; });
-  renderPokerEvening();
-}
-
-function savePokerEvening() {
-  const buys = window.pokerCurrentBuys || {};
-  const pot = pokerState.players.reduce((s, p) => s + (buys[p] || 0), 0);
-  if (pot === 0) { alert('לא הוזנו קניות לערב זה.'); return; }
-
-  const msg = 'הזן תוצאות לערב ' + (pokerState.evenings.length + 1) + ' (קופה: ' + pot + ') | פורמט: שם:סכום,שם:סכום | שחקנים: ' + pokerState.players.join(', ');
-  const resultStr = prompt(msg);
-  if (!resultStr) return;
-
-  const results = {};
-  try {
-    resultStr.split(',').forEach(function(part) {
-      const colonIdx = part.lastIndexOf(':');
-      const name = part.substring(0, colonIdx).trim();
-      const val = parseInt(part.substring(colonIdx + 1).trim());
-      if (name && !isNaN(val)) results[name] = val;
-    });
-  } catch(e) { alert('פורמט שגוי'); return; }
-
-  const sum = Object.values(results).reduce(function(a, b) { return a + b; }, 0);
-  if (Math.abs(sum) > 1) { alert('הסכום לא מאוזן: ' + sum); return; }
-
-  pokerState.evenings.push({
-    num: pokerState.evenings.length + 1,
-    date: new Date().toLocaleDateString('he-IL'),
-    pot: pot,
-    buys: JSON.parse(JSON.stringify(buys)),
-    results: results
-  });
-
-  window.pokerCurrentBuys = {};
-  pokerState.players.forEach(function(p) { window.pokerCurrentBuys[p] = 0; });
-
-  savePokerState();
-  renderPokerAll();
-  alert('ערב ' + pokerState.evenings.length + ' נשמר!');
-}>
+</script>
+</body>
+</html>
