@@ -2512,229 +2512,35 @@ function savePokerEvening() {
   const pot = pokerState.players.reduce((s, p) => s + (buys[p] || 0), 0);
   if (pot === 0) { alert('לא הוזנו קניות לערב זה.'); return; }
 
-  // בקש תוצאות: מי ניצח כמה (חייב להסתכם ל-0)
-  const resultStr = prompt(
-    'הזן תוצאות לערב ' + (pokerState.evenings.length + 1) + ':
-' +
-    'קופה: ₪' + pot + '
-
-' +
-    'פורמט: שם:סכום לכל שחקן, מופרד בפסיקים
-' +
-    'דוגמה: רון:50,שרול:-30,נירו:-20
-
-' +
-    'שחקנים: ' + pokerState.players.join(', ')
-  );
+  const msg = 'הזן תוצאות לערב ' + (pokerState.evenings.length + 1) + ' (קופה: ' + pot + ') | פורמט: שם:סכום,שם:סכום | שחקנים: ' + pokerState.players.join(', ');
+  const resultStr = prompt(msg);
   if (!resultStr) return;
 
   const results = {};
   try {
-    resultStr.split(',').forEach(part => {
-      const [name, val] = part.trim().split(':');
-      results[name.trim()] = parseInt(val);
+    resultStr.split(',').forEach(function(part) {
+      const colonIdx = part.lastIndexOf(':');
+      const name = part.substring(0, colonIdx).trim();
+      const val = parseInt(part.substring(colonIdx + 1).trim());
+      if (name && !isNaN(val)) results[name] = val;
     });
   } catch(e) { alert('פורמט שגוי'); return; }
 
-  const sum = Object.values(results).reduce((a, b) => a + b, 0);
+  const sum = Object.values(results).reduce(function(a, b) { return a + b; }, 0);
   if (Math.abs(sum) > 1) { alert('הסכום לא מאוזן: ' + sum); return; }
 
   pokerState.evenings.push({
     num: pokerState.evenings.length + 1,
     date: new Date().toLocaleDateString('he-IL'),
     pot: pot,
-    buys: { ...buys },
+    buys: JSON.parse(JSON.stringify(buys)),
     results: results
   });
 
   window.pokerCurrentBuys = {};
-  pokerState.players.forEach(p => { window.pokerCurrentBuys[p] = 0; });
+  pokerState.players.forEach(function(p) { window.pokerCurrentBuys[p] = 0; });
 
   savePokerState();
   renderPokerAll();
-  alert('✅ ערב ' + pokerState.evenings.length + ' נשמר!');
-}
-
-/* --- טבלה מצטברת --- */
-function getPokerTotals() {
-  const totals = {};
-  pokerState.players.forEach(p => totals[p] = 0);
-  pokerState.evenings.forEach(e => {
-    Object.entries(e.results || {}).forEach(([p, v]) => {
-      if (totals[p] !== undefined) totals[p] += v;
-      else totals[p] = v;
-    });
-  });
-  return totals;
-}
-
-function renderPokerTable() {
-  const card = document.getElementById('pokerTableCard');
-  const el = document.getElementById('pokerTableContent');
-  if (!card || !el) return;
-  if (pokerState.evenings.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = '';
-
-  const totals = getPokerTotals();
-  const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-  const medals = ['🥇','🥈','🥉'];
-
-  let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
-  sorted.forEach(([p, v], i) => {
-    const color = v > 0 ? '#2ecc71' : v < 0 ? '#e74c3c' : '#888';
-    const sign = v > 0 ? '+' : '';
-    html += '<div style="display:flex;align-items:center;gap:10px;background:#1a1f2e;border-radius:10px;padding:10px 14px;">' +
-      '<span style="font-size:18px;width:28px;">' + (medals[i] || (i+1) + '.') + '</span>' +
-      '<span style="flex:1;font-weight:600;color:white;">' + p + '</span>' +
-      '<span style="font-size:18px;font-weight:700;color:' + color + ';">' + sign + v + '₪</span>' +
-      '</div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-/* --- העברות --- */
-function calculateSettlements(totals) {
-  const cred = Object.entries(totals).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]).map(([n,v]) => ({n, v}));
-  const debt = Object.entries(totals).filter(([,v]) => v < 0).sort((a,b) => a[1]-b[1]).map(([n,v]) => ({n, v:-v}));
-  const transfers = [];
-  let ci = 0, di = 0;
-  while (ci < cred.length && di < debt.length) {
-    const amount = Math.min(cred[ci].v, debt[di].v);
-    if (amount > 0.01) transfers.push({ from: debt[di].n, to: cred[ci].n, amount: Math.round(amount) });
-    cred[ci].v -= amount; debt[di].v -= amount;
-    if (cred[ci].v < 0.01) ci++;
-    if (debt[di].v < 0.01) di++;
-  }
-  return transfers;
-}
-
-function renderPokerTransfers() {
-  const card = document.getElementById('pokerTransfersCard');
-  const el = document.getElementById('pokerTransfers');
-  if (!card || !el) return;
-  if (pokerState.evenings.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = '';
-
-  const totals = getPokerTotals();
-  const transfers = calculateSettlements(totals);
-
-  if (transfers.length === 0) {
-    el.innerHTML = '<div style="color:#2ecc71;text-align:center;padding:10px;">✅ הכל מסודר!</div>';
-    return;
-  }
-  el.innerHTML = transfers.map(t =>
-    '<div style="display:flex;align-items:center;gap:10px;background:#1a1f2e;border-radius:10px;padding:10px 14px;margin-bottom:6px;">' +
-      '<span style="font-weight:700;color:#e74c3c;">' + t.from + '</span>' +
-      '<span style="color:#888;font-size:18px;">→</span>' +
-      '<span style="font-weight:700;color:#2ecc71;">' + t.to + '</span>' +
-      '<span style="margin-right:auto;background:#D97644;color:white;padding:3px 12px;border-radius:12px;font-weight:700;">₪' + t.amount + '</span>' +
-    '</div>'
-  ).join('');
-}
-
-/* --- היסטוריה --- */
-function renderPokerHistory() {
-  const card = document.getElementById('pokerHistoryCard');
-  const el = document.getElementById('pokerHistory');
-  if (!card || !el) return;
-  if (pokerState.evenings.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = '';
-
-  el.innerHTML = [...pokerState.evenings].reverse().map(e =>
-    '<div style="background:#1a1f2e;border-radius:10px;padding:12px;margin-bottom:8px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-        '<div style="font-weight:700;color:#D97644;">ערב ' + e.num + ' · ' + e.date + '</div>' +
-        '<div style="color:#888;font-size:13px;">קופה ₪' + (e.pot || 0) + '</div>' +
-      '</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
-        Object.entries(e.results || {}).sort((a,b) => b[1]-a[1]).map(([p,v]) => {
-          const color = v > 0 ? '#2ecc71' : v < 0 ? '#e74c3c' : '#888';
-          return '<span style="background:#11141e;border-radius:8px;padding:4px 10px;font-size:13px;color:' + color + ';">' +
-            p + ': ' + (v > 0 ? '+' : '') + v + '</span>';
-        }).join('') +
-      '</div>' +
-    '</div>'
-  ).join('');
-}
-
-function resetPokerTournament() {
-  if (!confirm('לאפס את כל הטורניר? הכל יימחק!')) return;
-  pokerState.evenings = [];
-  window.pokerCurrentBuys = {};
-  savePokerState();
-  renderPokerAll();
-}
-
-/* טעינה כשנכנסים לטאב */
-(function() {
-  const _origNav = window.navigate;
-  window.navigate = function(view) {
-    _origNav(view);
-    if (view === 'poker') loadPokerState();
-  };
-})();
-
-</script>
-
-<!-- ============ POKER TAB ============ -->
-<section class="view" id="view-poker">
-  <div class="section-title">🃏 טורניר פוקר סיני 2026</div>
-
-  <!-- שחקנים -->
-  <div class="card" id="pokerPlayersCard">
-    <div style="font-weight:700;color:#D97644;margin-bottom:10px;">👥 שחקנים בטורניר</div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <input id="pokerPlayerInput" type="text" placeholder="הוסף שחקן..."
-        style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid #444;background:#1a1f2e;color:white;font-size:15px;direction:rtl;"
-        onkeydown="if(event.key==='Enter')addPokerPlayer()"/>
-      <button onclick="addPokerPlayer()"
-        style="background:#D97644;color:white;border:none;border-radius:8px;padding:9px 18px;font-weight:700;cursor:pointer;font-size:15px;">+</button>
-    </div>
-    <div id="pokerPlayersList" style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;"></div>
-  </div>
-
-  <!-- ערב חי -->
-  <div class="card" id="pokerEveningCard" style="display:none;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="font-weight:700;color:#D97644;font-size:16px;">🎴 ערב <span id="pokerEveningNum">1</span></div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="cancelPokerEvening()" id="pokerCancelBtn"
-          style="background:#555;color:white;border:none;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px;">ביטול ערב</button>
-        <button onclick="savePokerEvening()" id="pokerSaveBtn"
-          style="background:#2d6a4f;color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:14px;">סגור ערב ✓</button>
-      </div>
-    </div>
-
-    <!-- שחקנים + קניות -->
-    <div id="pokerInputs" style="display:flex;flex-direction:column;gap:10px;"></div>
-
-    <!-- סיכום -->
-    <div id="pokerEveningSumMsg" style="margin-top:12px;font-size:14px;text-align:center;padding:8px;border-radius:8px;background:#1a1f2e;"></div>
-  </div>
-
-  <!-- טבלה מצטברת -->
-  <div class="card" id="pokerTableCard" style="display:none;">
-    <div style="font-weight:700;color:#D97644;margin-bottom:10px;font-size:16px;">📊 טבלה מצטברת</div>
-    <div id="pokerTableContent"></div>
-  </div>
-
-  <!-- העברות -->
-  <div class="card" id="pokerTransfersCard" style="display:none;">
-    <div style="font-weight:700;color:#D97644;margin-bottom:10px;font-size:16px;">💸 העברות לסגירת חובות</div>
-    <div id="pokerTransfers"></div>
-  </div>
-
-  <!-- היסטוריה -->
-  <div class="card" id="pokerHistoryCard" style="display:none;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="font-weight:700;color:#D97644;font-size:16px;">📋 ערבים קודמים</div>
-      <button onclick="resetPokerTournament()"
-        style="background:#c0392b;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;">איפוס</button>
-    </div>
-    <div id="pokerHistory"></div>
-  </div>
-</section>
-
-</body>
-</html>
+  alert('ערב ' + pokerState.evenings.length + ' נשמר!');
+}>
